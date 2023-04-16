@@ -1,0 +1,375 @@
+1.案例，统计网站访问人数
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>访问人数统计</title>
+</head>
+<body>
+<%
+  // 获取 application_1 对象
+  javax.servlet.ServletContext application_1 = request.getServletContext();
+// 从 application_1 对象中获取访问人数
+  Integer count = (Integer) application_1.getAttribute("count");
+// 如果不存在访问人数属性，则初始化为0
+  if (count == null) {
+    count = 0;
+  }
+// 增加访问人数
+  count++;
+// 更新 application_1 对象中的访问人数属性值
+  application_1.setAttribute("count", count);
+
+// 获取当前时间
+  java.util.Date now = new java.util.Date();
+
+// 获取上次访问时间
+  java.util.Date lastVisit = (java.util.Date) application_1.getAttribute("lastVisit");
+// 如果上次访问时间不存在，则说明这是第一次访问
+  String message = "";
+  if (lastVisit == null) {
+    message = "欢迎您首次访问本站！";
+  } else {
+    // 计算两次访问之间的时间差
+    long diff = now.getTime() - lastVisit.getTime();
+    long diffSeconds = diff / 1000 % 60;
+    long diffMinutes = diff / (60 * 1000) % 60;
+    long diffHours = diff / (60 * 60 * 1000) % 24;
+    long diffDays = diff / (24 * 60 * 60 * 1000);
+
+    message = "您上次访问本站是在 ";
+    message += lastVisit.toString() + "，";
+    message += "距今已过去 " + diffDays + " 天 ";
+    message += diffHours + " 小时 ";
+    message += diffMinutes + " 分 ";
+    message += diffSeconds + " 秒。";
+  }
+
+// 更新上次访问时间属性值
+  application_1.setAttribute("lastVisit", now);
+%>
+
+<h1>欢迎访问本站！</h1>
+<p><%=message%></p>
+<p>您是本站第 <%=count%> 位访问者。</p>
+
+</body>
+</html>
+2.网上答题及自动评测系统
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>提交答题信息</title>
+</head>
+<body>
+
+<h1>提交答题信息</h1>
+<form action="process.jsp" method="post" >
+ <div>
+  <p>请选择您所在的年级：</p>
+   <input type="radio" name="grade" value="1" id="grade1"><label for="grade1">大学一年级</label>
+   <input type="radio" name="grade" value="2" id="grade2"><label for="grade2">大学二年级</label>
+   <input type="radio" name="grade" value="3" id="grade3"><label for="grade3">大学三年级</label>
+   <input type="radio" name="grade" value="3" id="grade4"><label for="grade3">大学四年级</label>
+  <p>请选择您所在的班级：</p>
+  <select name="clazz">
+    <option value="1">1班</option>
+    <option value="2">2班</option>
+    <option value="3">3班</option>
+    <option value="4">4班</option>
+  </select>
+
+  <p>请选择您喜欢的科目：</p>
+  <input type="checkbox" name="subject" value="概率论" id="subject1"><label for="subject1">概率论</label>
+  <input type="checkbox" name="subject" value="大学英语" id="subject2"><label for="subject2">大学英语</label>
+  <input type="checkbox" name="subject" value="哲学" id="subject3"><label for="subject3">哲学</label>
+  <input type="checkbox" name="subject" value="软件系统组成与设计" id="subject4"><label for="subject4">软件系统组成与设计</label>
+  <br>
+  <input type="checkbox" name="subject" value="汇编语言" id="subject5"><label for="subject5">汇编语言</label>
+  <input type="checkbox" name="subject" value="Java语言设计" id="subject6"><label for="subject6">Java语言设计</label>
+  <input type="checkbox" name="subject" value="大学体育" id="subject7"><label for="subject7">大学体育</label>
+
+  <br><br>
+   <p>第一题：</p>
+     <P>一个质量为10kg的物体在地球上下落的加速度是多少?</P>
+      <input type="text" name="question1"  id="question1">
+   <p>第二题：</p>
+      <p>当激光束入射到水中时，它会发生什么现象？</p>
+      <input type="text" name="question2"  id="question2">
+   <p>第三题：</p>
+      <p>动力学中，牛顿第一定律提出了一个基本概念，请问这个概念是什么？</p>
+      <input type="text" name="question3"  id="question3">
+   <p>第四题：</p>
+      <p>太阳系中距离地球最近的行星是哪颗？</p>
+      <input type="text" name="question4"  id="question4">
+   <p>第五题：</p>
+      <p>在肥料生产过程中，经常使用一种化学物质进行中和反应，请问这种化学物质是什么？</p>
+      <select name="question5">
+         <option value="1">石灰</option>
+         <option value="2">原子弹</option>
+         <option value="3">芯片</option>
+         <option value="4">外星人</option>
+      </select>
+  <input type="submit" value="提交">
+ </div>
+</form>
+
+</body>
+</html>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>处理答题信息</title>
+</head>
+<body>
+<%
+  // 获取提交的年级信息
+  String grade = request.getParameter("grade");
+
+// 获取提交的班级信息
+  String clazz = request.getParameter("clazz");
+
+// 获取提交的科目信息
+  String[] subject = request.getParameterValues("subject");
+  //获得提交的题目答案
+  String question1=request.getParameter("question1");
+  String question2=request.getParameter("question2");
+  String question3=request.getParameter("question3");
+  String question4=request.getParameter("question4");
+  String question5=request.getParameter("question5");
+
+// 输出提交的答题信息
+  out.println("您选择的年级是：" + grade + "<br>");
+  out.println("您选择的班级是：" + clazz + "<br>");
+  out.println("您喜欢的科目有：");
+  if (subject == null || subject.length == 0) {
+    out.println("没有选择科目");
+  } else {
+    for (int i = 0; i < subject.length; i++) {
+      out.println(subject[i] + " ");
+    }
+    out.println("<br>");
+  }
+  //题目结果
+  if(question1.contains("9.8")){
+    out.println("第一题正确");
+  }else {
+    out.println("第一题错误");
+  }
+  out.println("答案：9.8m/s²"+"<br>");
+%>
+  <%
+  if(question2.contains("折射")){
+    out.println("第二题正确");
+  }else {
+    out.println("第二题错误");
+  }
+    out.println("答案：发生折射，即改变方向"+"<br>");
+  %>
+  <%
+    if(question3.contains("惯性")){
+    out.println("第三题正确");
+    }else {
+    out.println("第三题错误");
+  }
+    out.println("答案：惯性"+"<br>");%>
+  <%
+    if(question4.contains("金星")){
+    out.println("第四题正确");
+    }else {
+    out.println("第四题错误");
+  }
+    out.println("答案:金星"+"<br>");
+  %>
+  <%
+    if(question5.equals("石灰")){
+    out.println("第五题正确");
+    }else {
+    out.println("第五题错误");
+    }
+    out.println("答案:石灰"+"<br>");
+%>
+</body>
+</html>
+3.简单的购物车程序实现代码
+（1）商品列表页面(肉类)：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+    ArrayList<String> meatList = new ArrayList<>(); // 肉类商品列表
+    meatList.add("北京烤鸭");
+    meatList.add("红烧牛肉");
+    meatList.add("东坡肉");
+    meatList.add("粉蒸肉");
+    session.setAttribute("meatList", meatList); // 将肉类商品列表存入session中
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>肉类商品列表</title>
+</head>
+<body>
+    <h1>肉类商品列表</h1>
+    <ul>
+        <%
+            for (String meat : meatList) {
+                out.println("<li>" + meat + " <a href='add.jsp?type=meat&name=" + meat + "'>加入购物车</a></li>");
+            }
+        %>
+    </ul>
+    <a href="ball.jsp">球类商品列表</a> <!-- 跳转到球类商品列表页面 -->
+</body>
+</html>
+（2）商品列表页面(球类)：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+    ArrayList<String> ballList = new ArrayList<>(); // 球类商品列表
+    ballList.add("足球");
+    ballList.add("篮球");
+    ballList.add("排球");
+    ballList.add("乒乓球");
+    session.setAttribute("ballList", ballList); // 将球类商品列表存入session中
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>球类商品列表</title>
+</head>
+<body>
+    <h1>球类商品列表</h1>
+    <ul>
+        <%
+            for (String ball : ballList) {
+                out.println("<li>" + ball + " <a href='add.jsp?type=ball&name=" + ball + "'>加入购物车</a></li>");
+            }
+        %>
+    </ul>
+    <a href="meat.jsp">肉类商品列表</a> <!-- 跳转到肉类商品列表页面 -->
+</body>
+</html>
+（3）添加商品到购物车页面：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    String type = request.getParameter("type"); // 获取商品类型
+    String name = request.getParameter("name"); // 获取商品名称
+    ArrayList<String> cartList = (ArrayList<String>) session.getAttribute("cartList"); // 获取购物车列表
+
+    if (cartList == null) { // 如果购物车为空，创建新的购物车列表
+        cartList = new ArrayList<>();
+        session.setAttribute("cartList", cartList);
+    }
+
+    if (name != null && !cartList.contains(name)) { // 如果商品名称不为null且购物车中不存在该商品，则将商品添加到购物车中
+        cartList.add(name);
+    }
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加商品到购物车</title>
+</head>
+<body>
+    <h1>添加商品到购物车</h1>
+    <% if (name != null && !cartList.contains(name)) { %>
+        <p>商品已成功添加到购物车中。</p>
+    <% } else { %>
+        <p>购物车中已存在该商品，无需重复添加。</p>
+    <% } %>
+    <a href="<%= type.equals("meat") ? "meat.jsp" : "ball.jsp" %>">返回继续购物</a> <!-- 根据商品类型返回对应的商品列表页 -->
+    <a href="cart.jsp">查看购物车</a> <!-- 跳转到查看购物车页面 -->
+</body>
+</html>
+（4）查看购物车页面：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    ArrayList<String> cartList = (ArrayList<String>) session.getAttribute("cartList"); // 获取购物车列表
+    if (cartList == null) { // 如果购物车为空，创建新的购物车列表
+        cartList = new ArrayList<>();
+        session.setAttribute("cartList", cartList);
+    }
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看购物车</title>
+</head>
+<body>
+    <h1>查看购物车</h1>
+    <table border="1">
+        <tr>
+            <th>商品名称</th>
+            <th>操作</th>
+        </tr>
+        <%
+            for (String cart : cartList) {
+                out.println("<tr><td>" + cart + "</td>");
+                out.println("<td><a href='delete.jsp?type=cart&name=" + cart + "'>删除</a></td></tr>");
+            }
+        %>
+    </table>
+    <a href="meat.jsp">继续购物</a> <!-- 返回肉类商品列表页 -->
+    <a href="ball.jsp">继续购物</a> <!-- 返回球类商品列表页 -->
+    <a href="clear.jsp?type=cart">清空购物车</a> <!-- 清空购物车 -->
+</body>
+</html>
+（5）删除购物车中商品页面：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    String type = request.getParameter("type"); // 获取类型
+    String name = request.getParameter("name"); // 获取商品名称
+    ArrayList<String> cartList = (ArrayList<String>) session.getAttribute("cartList"); // 获取购物车列表
+
+    if (cartList != null && name != null && cartList.contains(name)) { // 如果购物车不为空、商品名称不为null且购物车中存在该商品，则将其从购物车中删除
+        cartList.remove(name);
+    }
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>删除购物车商品</title>
+</head>
+<body>
+    <h1>删除购物车商品</h1>
+    <% if (name != null) { %>
+        <p>商品已成功从购物车中删除。</p>
+    <% } else { %>
+        <p>购物车中不存在该商品，无法删除。</p>
+    <% } %>
+    <a href="<%= type.equals("cart") ? "cart.jsp" : (type.equals("meat") ? "meat.jsp" : "ball.jsp") %>">返回</a> <!-- 根据类型返回不同的页面 -->
+</body>
+</html>
+（6）清空购物车页面：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    String type = request.getParameter("type"); // 获取类型
+    ArrayList<String> cartList = (ArrayList<String>) session.getAttribute("cartList"); // 获取购物车列表
+
+    if (cartList != null && type.equals("cart")) { // 如果购物车不为空且类型为cart，则清空购物车
+        cartList.clear();
+    }
+%>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>清空购物车</title>
+</head>
+<body>
+    <h1>清空购物车</h1>
+    <% if (type.equals("cart")) { %>
+        <p>购物车已成功清空。</p>
+    <% } else { %>
+        <p>操作失败，未能清空购物车。</p>
+    <% } %>
+    <a href="cart.jsp">返回购物车</a> <!-- 返回购物车页面 -->
+</body>
+</html>
+
